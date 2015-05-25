@@ -9,7 +9,6 @@ let crypto = require('crypto'),
     model: User reference to mongo object
     builder: function to build entry
  */
-
 /*
     Define
  */
@@ -25,41 +24,6 @@ object.define = function(name, model, builderFunction) {
         model: model,
         builder: builderFunction
     };
-}
-/*
-    Helpers
- */
-object.rndHex = function(length) {
-    return crypto.randomBytes(Math.ceil(length/2))
-        .toString('hex') // convert to hexadecimal format
-        .slice(0,length);   // return required number of characters
-}
-
-object.rndNumber = function(minNumber, maxNumber) {
-    minNumber = minNumber || 0;
-    maxNumber = maxNumber || 1000;
-    return Math.floor(Math.random() * (maxNumber - minNumber + 1) + minNumber);
-}
-
-object.rndDate = function(maxDate, minDate) {
-    var min = 0, 
-        max = new Date().getTime(),
-        value;
-
-    if(typeof maxDate === 'object'){
-        max = maxDate.getTime();
-    }
-    if(typeof maxDate === 'Number'){
-        max = maxDate;
-    }
-    if(typeof minDate === 'object'){
-        min = minDate.getTime();
-    }
-    if(typeof minDate === 'Number'){
-        min = minDate;
-    }
-    value = rndNumber(min, max);
-    return new Date(value);
 }
 
 /*
@@ -95,26 +59,24 @@ object.attributes = function(name, data) {
 object.attributesArray = function(name, count, data) {
     let result = [];
     for(var i = 0; i < count; i++){
-        result.push(attributes(name, data));
+        result.push(object.attributes(name, data));
     };
     return result;
 }; 
 object.createArray = function(name, count, data) {
     let result = [];
     for(var i = 0; i < count; i++){
-        result.push(create(name, data));
+        result.push(object.create(name, data));
     };
     return result;
 };
 object.buildArray = function(name, count, data) {
     let result = [];
     for(var i = 0; i < count; i++){
-        result.push(build(name, data, options));
+        result.push(object.build(name, data, options));
     };
     return result;
 };
-
-
 
 module.exports = object;
 

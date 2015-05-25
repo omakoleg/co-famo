@@ -1,20 +1,21 @@
 'use strict';
 
 require('co-mocha');
+
 let mongoose = require('mongoose'),
+    Random = require('random-js')(),
     Factory = require('../');
 
 mongoose.connect('mongodb://localhost/test-mongo-factory');
+
 var db = mongoose.connection;
-// db.on('error', console.error.bind(console, 'connection error:'));
-// db.once('open', function (callback) {
-  
-// });
-// 
 var userSchema = mongoose.Schema({
     name:  String,
     body:   String,
-    comments: [{ body: String, date: Date }],
+    comments: [{ 
+        body: String, 
+        date: Date 
+    }],
     date: { type: Date, default: Date.now },
     hidden: Boolean,
     meta: {
@@ -25,19 +26,19 @@ var userSchema = mongoose.Schema({
 var User = mongoose.model('User', userSchema);
 
 Factory.define('user.meta', function(lib) {
-    this.votes = lib.rndNumber();
-    this.favs = lib.rndNumber(0, 10);
+    this.votes = Random.integer(0, 30);
+    this.favs = Random.integer(0, 10);
 });
 
 Factory.define('user.comment', function(lib) {
-    this.votes = lib.rndNumber();
-    this.favs = lib.rndNumber(0, 10);
+    this.body = Random.hex(32);
+    this.date = new Date();
 });
 
 Factory.define('user', User, function(lib) {
-    this.name = lib.rndHex(32);
-    this.body = lib.rndHex(40);
-    this.comments = lib.buildArray('user.comment', 0, 10);
+    this.name = Random.hex(32);
+    this.body = Random.hex(40);
+    this.comments = lib.attributesArray('user.comment', 3);
     this.date = new Date();
     this.hidden = false;
     this.meta = lib.attributes('user.meta');
