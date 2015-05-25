@@ -1,0 +1,21 @@
+{
+  "name": "mongoFactory",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "export NODE_ENV=test; node ./node_modules/mocha/bin/mocha --harmony --recursive"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "co-mocha": "^1.1.0",
+    "mocha": "^2.2.5",
+    "mongoose": "^4.0.3"
+  },
+  "dependencies": {
+    "colors": "^1.1.0",
+    "crypto": "0.0.3",
+    "lodash": "^3.9.1"
+  }
+}
