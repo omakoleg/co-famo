@@ -6,8 +6,10 @@ let crypto = require('crypto'),
         registry: []
     };
 /*
-    model: User reference to mongo object
-    builder: function to build entry
+    registry: [{
+        model: User reference to mongo object
+        builder: function to build entry
+    }]
  */
 /*
     Define
@@ -29,6 +31,21 @@ object.define = function(name, model, builderFunction) {
 /*
     Actions
  */
+object.clean = function(name, filter) {
+    if(object.registry[name].model === undefined){
+        throw new Error('Mongo factory ' + name + ' is absctract. No mongoose model attached to it.');
+    }
+    filter = filter || {};
+    return new Promise(function(resolve, reject){
+        object.registry[name].model.remove(filter, function (err) {
+            if (err){
+                return reject(err);
+            }
+            resolve();
+        });
+    });
+};
+
 object.build = function(name, data) {
     if(object.registry[name].model === undefined){
         throw new Error('Mongo factory ' + name + ' is absctract. No mongoose model attached to it.');
@@ -55,7 +72,9 @@ object.attributes = function(name, data) {
     object.registry[name].builder.call(temp, object);
     return _.merge(temp, data || {});
 };
-
+/*
+    Bulk actions
+ */
 object.attributesArray = function(name, count, data) {
     let result = [];
     for(var i = 0; i < count; i++){
