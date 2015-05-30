@@ -32,38 +32,26 @@ object.define = function(name, model, builderFunction) {
     Actions
  */
 object.clean = function(name, filter) {
-    if(object.registry[name].model === undefined){
-        throw new Error('Mongo factory ' + name + ' is absctract. No mongoose model attached to it.');
+    if(!object.registry[name].model){
+        throw new Error('Mongo factory ' + name + ' is absctract. No mongoose model attached to it');
     }
     filter = filter || {};
-    return new Promise(function(resolve, reject){
-        object.registry[name].model.remove(filter, function (err) {
-            if (err){
-                return reject(err);
-            }
-            resolve();
-        });
-    });
+    return object.registry[name].model.remove(filter).exec();
 };
 
 object.build = function(name, data) {
-    if(object.registry[name].model === undefined){
-        throw new Error('Mongo factory ' + name + ' is absctract. No mongoose model attached to it.');
+    if(!object.registry[name].model){
+        throw new Error('Mongo factory ' + name + ' is absctract. No mongoose model attached to it');
     }
     let attributes = object.attributes(name, data);
     return new object.registry[name].model(attributes);
 };
+
 object.create = function(name, data) {
     let entry = object.build(name, data);
-    return new Promise(function(resolve, reject){
-        entry.save(function (err, record) {
-            if (err) {
-                return reject(err);
-            }
-            resolve(record);
-        });
-    });
+    return entry.save();
 };
+
 object.attributes = function(name, data) {
     if(object.registry[name] === undefined){
         throw new Error('Mongo factory ' + name + ' is not defined. Use Factory.define() to define new factories');
