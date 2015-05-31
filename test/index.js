@@ -75,9 +75,26 @@ function findUser(query){
 }
 
 describe('.define', function(){ 
-    it('redefine error');
-    it('without builder funciton');
-    it('without model');
+    it('redefine error', function * (){
+        expect(function(){
+            Factory.define('redefine.me', function(){} );
+            Factory.define('redefine.me', function(){} ); //throw
+        }).to.throw('Mongo factory redefine.me already defined');
+    });
+
+    it('without builder funciton', function * (){
+        expect(function(){
+            Factory.define('no.builder');
+        }).to.throw('Mongo factory no.builder definition don\'t have builder function');
+    });
+
+    it('without model', function * (){
+        Factory.define('no.model', function(lib) {
+            this.id = 1;
+        });
+        // internals
+        expect(Factory.registry['no.model'].model).to.eql(null);
+    });
 });
 
 describe('.clean', function(){
@@ -111,15 +128,15 @@ describe('.attributes', function(){
     });
 
     it('set abstract attributes', function * (){
-        Factory.define('abstract', function() {
+        Factory.define('abstract.attributes', function() {
             this.votes = Random.integer(0, 30);
         });
-        let attributes = Factory.attributes('abstract');
+        let attributes = Factory.attributes('abstract.attributes');
         expect(attributes.votes).to.match(/[0-9]{1,}/);
     });
     it('set empty attributes', function * (){
-        Factory.define('empty', User, function() { });
-        let attributes = Factory.attributes('empty');
+        Factory.define('empty.attributes', User, function() { });
+        let attributes = Factory.attributes('empty.attributes');
         expect(attributes).to.eql({});
     });
 });
@@ -133,17 +150,22 @@ describe('.attributesArray', function(){
     });
 
     it('set abstract attributes', function * (){
-        Factory.define('abstract', function() {
+        Factory.define('abstract.attributesArray', function() {
             this.votes = Random.integer(0, 30);
         });
-        let attributes = Factory.attributesArray('abstract', 1);
+        let attributes = Factory.attributesArray('abstract.attributesArray', 1);
         expect(attributes[0].votes).to.match(/[0-9]{1,}/);
     });
     it('set empty attributes', function * (){
-        Factory.define('empty', User, function() { });
-        let attributes = Factory.attributesArray('empty', 2);
+        Factory.define('empty.attributesArray', User, function() { });
+        let attributes = Factory.attributesArray('empty.attributesArray', 2);
         expect(attributes.length).to.eql(2);
         expect(attributes[0]).to.eql({});
+    });
+
+    it('default count is 1', function * (){
+        let users = yield Factory.attributesArray('user');
+        expect(users.length).to.eql(1);
     });
 });
 
@@ -171,7 +193,24 @@ describe('.build', function(){
 });
 
 describe('.buildArray', function(){
-    it('pending');
+    it('user entry', function * (){
+        yield Factory.clean('user'); // clean all
+        let users = yield Factory.buildArray('user'); // build 1
+        expectUser(users[0]);
+        let cntMongo = yield User.count();
+        expect(cntMongo).to.eql(0);
+    });
+
+    it('user.meta entry', function * (){
+        expect(function(){
+            Factory.buildArray('user.meta'); //will throw same as build
+        }).to.throw('Mongo factory user.meta is absctract. No mongoose model attached to it');
+    });
+
+    it('default count is 1', function * (){
+        let users = yield Factory.buildArray('user');
+        expect(users.length).to.eql(1);
+    });
 });
 
 describe('.create', function(){
@@ -192,7 +231,26 @@ describe('.create', function(){
 });
 
 describe('.createArray', function(){
-    it('pending');
+    it('user entry', function * (){
+        yield Factory.clean('user'); // clean all
+        let users = yield Factory.createArray('user', 2);
+        expect(users.length).to.eql(2);
+        expect(users[0]._id).to.match(/[0-9a-f]{10,}/);
+        expect(users[1]._id).to.match(/[0-9a-f]{10,}/);
+        expectUser(users[0]);
+        expectUser(users[1]);
+    });
+
+    it('user.meta entry', function * (){
+        expect(function(){
+            Factory.createArray('user.meta', 2); //will throw same as build
+        }).to.throw('Mongo factory user.meta is absctract. No mongoose model attached to it');
+    });
+
+    it('default count is 1', function * (){
+        let users = yield Factory.createArray('user');
+        expect(users.length).to.eql(1);
+    });
 });
 
 

@@ -19,8 +19,12 @@ object.define = function(name, model, builderFunction) {
         builderFunction = model;
         model = null;
     }
-    if(object.registry.name !== undefined){
+    if(object.registry[name] !== undefined){
         throw new Error('Mongo factory ' + name + ' already defined');
+    }
+
+    if(builderFunction === undefined){
+        throw new Error('Mongo factory ' + name + ' definition don\'t have builder function');
     }
     object.registry[name] = {
         model: model,
@@ -65,6 +69,7 @@ object.attributes = function(name, data) {
  */
 object.attributesArray = function(name, count, data) {
     let result = [];
+    count = count || 1;
     for(var i = 0; i < count; i++){
         result.push(object.attributes(name, data));
     };
@@ -72,6 +77,7 @@ object.attributesArray = function(name, count, data) {
 }; 
 object.createArray = function(name, count, data) {
     let result = [];
+    count = count || 1;
     for(var i = 0; i < count; i++){
         result.push(object.create(name, data));
     };
@@ -79,8 +85,9 @@ object.createArray = function(name, count, data) {
 };
 object.buildArray = function(name, count, data) {
     let result = [];
+    count = count || 1;
     for(var i = 0; i < count; i++){
-        result.push(object.build(name, data, options));
+        result.push(object.build(name, data));
     };
     return result;
 };
