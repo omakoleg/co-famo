@@ -1,7 +1,6 @@
 'use strict';
 
-let crypto = require('crypto'),
-    _ = require('lodash'),
+let _ = require('lodash'),
     object = {
         registry: []
     };
@@ -11,8 +10,15 @@ let crypto = require('crypto'),
         builder: function to build entry
     }]
  */
+
 /*
-    Define
+    Define:
+        Factory.define(<name>, <model>, <builder funciton>);
+        Factory.define(<name>, <builder funciton>);
+
+    Throw cases: 
+        redefine
+        builder function required
  */
 object.define = function(name, model, builderFunction) {
     if (builderFunction === undefined) {
@@ -35,6 +41,13 @@ object.define = function(name, model, builderFunction) {
 /*
     Actions
  */
+/*
+    Remove models from db by name
+
+    Clean:
+        Factory.clean(<name>);
+        Factory.clean(<name>, <mongoose query to use in remove>)
+ */
 object.clean = function(name, filter) {
     if(!object.registry[name].model){
         throw new Error('Mongo factory ' + name + ' is absctract. No mongoose model attached to it');
@@ -42,7 +55,15 @@ object.clean = function(name, filter) {
     filter = filter || {};
     return object.registry[name].model.remove(filter).exec();
 };
+/*
+    Create new Object (without saving)
 
+    Build:
+        Factory.build(<name>);
+        Factory.build(<name>, <data to be merged>)
+    Throws:
+        factory is abstract
+ */
 object.build = function(name, data) {
     if(!object.registry[name].model){
         throw new Error('Mongo factory ' + name + ' is absctract. No mongoose model attached to it');
@@ -50,12 +71,28 @@ object.build = function(name, data) {
     let attributes = object.attributes(name, data);
     return new object.registry[name].model(attributes);
 };
+/*
+    Create new Object (with saving)
 
+    Build:
+        Factory.create(<name>);
+        Factory.create(<name>, <data to be merged>)
+    Throw cases:
+        see .build cases
+ */
 object.create = function(name, data) {
     let entry = object.build(name, data);
     return entry.save();
 };
+/*
+    Create object attributes
 
+    Build:
+        Factory.attributes(<name>);
+        Factory.attributes(<name>, <data to be merged>)
+    Throw cases:
+        factory not defined
+ */
 object.attributes = function(name, data) {
     if(object.registry[name] === undefined){
         throw new Error('Mongo factory ' + name + ' is not defined. Use Factory.define() to define new factories');
@@ -67,6 +104,9 @@ object.attributes = function(name, data) {
 /*
     Bulk actions
  */
+/*
+    See .attributes
+ */
 object.attributesArray = function(name, count, data) {
     let result = [];
     count = count || 1;
@@ -75,6 +115,9 @@ object.attributesArray = function(name, count, data) {
     };
     return result;
 }; 
+/*
+    See .create
+ */
 object.createArray = function(name, count, data) {
     let result = [];
     count = count || 1;
@@ -83,6 +126,9 @@ object.createArray = function(name, count, data) {
     };
     return result;
 };
+/*
+    See .build
+ */
 object.buildArray = function(name, count, data) {
     let result = [];
     count = count || 1;

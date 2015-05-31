@@ -1,13 +1,11 @@
 {
   "name": "co-famo",
   "version": "0.0.1",
-  "description": "Simple factory for mongoose to build mocked objects in test cases",
+  "description": "Simple npm for creating mongoose models in test cases.",
   "main": "index.js",
-  "scripts": {
-    "test": "export NODE_ENV=test; node ./node_modules/mocha/bin/mocha --harmony --recursive"
+  "directories": {
+    "test": "test"
   },
-  "author": "oleg.makiienko@gmail.com",
-  "license": "MIT",
   "devDependencies": {
     "chai": "^2.3.0",
     "co-mocha": "^1.1.0",
@@ -15,9 +13,20 @@
     "mongoose": "^4.0.3"
   },
   "dependencies": {
-    "colors": "^1.1.0",
-    "crypto": "0.0.3",
     "lodash": "^3.9.1",
     "random-js": "^1.0.4"
-  }
+  },
+  "scripts": {
+    "test": "export NODE_ENV=test; node ./node_modules/mocha/bin/mocha --harmony --recursive"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/omakoleg/co-famo.git"
+  },
+  "author": "oleg.makiienko@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/omakoleg/co-famo/issues"
+  },
+  "homepage": "https://github.com/omakoleg/co-famo"
 }
