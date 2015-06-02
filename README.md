@@ -19,6 +19,19 @@ npm test
 ```
 Tests written with `co-mocha` and `chai.expect`
 
+
+### API
+
+ - `define` - define new factory.
+ - `attributes` - generate object using builder function
+ - `build` - generate model object using builder function
+ - `create` - generate and save model using builder function
+ - `clean` - remove entries from database. All or using filter
+ - `attributesArray` - generate objects array using builder function. Default is 1
+ - `buildArray` - generate models array using builder function. Default is 1
+ - `createArray` - generate and save models array using builder function. Default is 1
+
+
 ### Note for generating entry values
 
 Prefferable to use `random-js` to generate each value as somehting random. 
@@ -178,6 +191,14 @@ yield Factory.clean('user', {name: 'test'}); //will delete all users with name: 
 yield Factory.clean('user'); //will delete all users
 
 ```
+
+
+#TODO
+
+- traits
+- accept options
+- list all
+- get one
 
 
 
