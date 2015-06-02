@@ -20,19 +20,37 @@ npm test
 Tests written with `co-mocha` and `chai.expect`
 
 
-### API
+# API
 
- - `define` - define new factory.
- - `attributes` - generate object using builder function
- - `build` - generate model object using builder function
- - `create` - generate and save model using builder function
- - `clean` - remove entries from database. All or using filter
- - `attributesArray` - generate objects array using builder function. Default is 1
- - `buildArray` - generate models array using builder function. Default is 1
- - `createArray` - generate and save models array using builder function. Default is 1
+#### Define
+ - `define(name, model, builder)` - define new factory.
+ - `define(name, builder)` - define new abstract factory. No build and create here
+ 
+#### Attributes
+ - `attributes(data)`
+ - `attributes(data, traits)` - generate object using builder function
+ 
+#### Build
+ - `build(name)`
+ - `build(name, data)`
+ - `build(name, data, traits)` - generate model object using builder function
+ 
+#### Create
+ - `create(name)`
+ - `create(name, data)`
+ - `create(name, data, traits)` - generate and save model using builder function
+ 
+#### Clean
+ - `clean(name)`, `clean(name, query)` - remove entries from database. All or using filter
+ 
+#### Array attributes, build, create
+ - `method(name)` Default count is 1
+ - `method(name, count)`
+ - `method(name, count, data)`
+ - `method(name, count, data, traits)`
 
 
-### Note for generating entry values
+##### Note for generating entry values
 
 Prefferable to use `random-js` to generate each value as somehting random. 
 ```
@@ -43,7 +61,7 @@ Factory.define('user.meta', function(lib) {
     this.body = Random.hex(40);
 });
 ```
-### Best practice
+##### Best practice
 You can't know dynamic value of entry and can't rely on its value without directly specifying it.
 
 ```
@@ -84,11 +102,41 @@ expect(responseEntry.votes).to.eql(231);
 
 # Usage
 
-Define accept builder funciton with one argument which set to current factory object. So all public methods available to use:
+Define accept builder funciton with one argument which set to current factory object. 
+
+Traits add custom functions to modify resulting object. They run in context `this` set to resulting object so you could reference `this.body` properties of result.
+Trait `{magic: '-join-'}` accept value passed as first argument and factory object as second.
+```
+Factory.define('etc', function(lib) {
+    this.body = 'aaa';
+    this.text = 'bbb';
+    this.magic = function(value, factory){
+      this.computed =  this.text + value + this.body;
+  }
+});
+
+// will create object with key computed set to 'aaa--bbb'
+Factory('etc', {}, {magic: '--'})
+
+
+```
+
+So all public methods available to use:
+
 ```
 Factory.define('something', function(lib) {
     this.subentry = lib.attributes('something.else');
     this.subentriesArray = lib.attributesArray('something.else.array', 2);
+});
+
+Factory.define('with.trait', function(lib) {
+    this.body = Random.hex(32);
+    this.text = Random.hex(32);
+    this.computed = '';
+
+    this.magic = function(value, factory){
+        this.computed =  this.text + this.body;
+    }
 });
 ```
 

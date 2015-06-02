@@ -64,11 +64,11 @@ object.clean = function(name, filter) {
     Throws:
         factory is abstract
  */
-object.build = function(name, data) {
+object.build = function(name, data, traits) {
     if(!object.registry[name].model){
         throw new Error('Mongo factory ' + name + ' is absctract. No mongoose model attached to it');
     }
-    let attributes = object.attributes(name, data);
+    let attributes = object.attributes(name, data, traits);
     return new object.registry[name].model(attributes);
 };
 /*
@@ -80,8 +80,8 @@ object.build = function(name, data) {
     Throw cases:
         see .build cases
  */
-object.create = function(name, data) {
-    let entry = object.build(name, data);
+object.create = function(name, data, traits) {
+    let entry = object.build(name, data, traits);
     return entry.save();
 };
 /*
@@ -93,12 +93,31 @@ object.create = function(name, data) {
     Throw cases:
         factory not defined
  */
-object.attributes = function(name, data) {
+object.attributes = function(name, data, traits) {
     if(object.registry[name] === undefined){
         throw new Error('Mongo factory ' + name + ' is not defined. Use Factory.define() to define new factories');
     }
     let temp = {};
     object.registry[name].builder.call(temp, object);
+    // run each trait in context of builded object
+    // pass trait value to function
+    _.forOwn(traits, function(value, key){
+        if(key === 'omit'){
+            if(_.isArray(value)){
+                value.forEach(function(omitValue){
+                    delete temp[omitValue.toString()];
+                });
+            } else {
+                delete temp[value.toString()];
+            }
+        } else if(_.isFunction(temp[key])){
+            temp[key].call(temp, value, object);
+        }
+    });
+    // clean functions
+    temp = _.pick(temp, function(value){
+        return !_.isFunction(value);
+    });
     return _.merge(temp, data || {});
 };
 /*
@@ -107,33 +126,33 @@ object.attributes = function(name, data) {
 /*
     See .attributes
  */
-object.attributesArray = function(name, count, data) {
+object.attributesArray = function(name, count, data, traits) {
     let result = [];
     count = count || 1;
     for(var i = 0; i < count; i++){
-        result.push(object.attributes(name, data));
+        result.push(object.attributes(name, data, traits));
     };
     return result;
 }; 
 /*
     See .create
  */
-object.createArray = function(name, count, data) {
+object.createArray = function(name, count, data, traits) {
     let result = [];
     count = count || 1;
     for(var i = 0; i < count; i++){
-        result.push(object.create(name, data));
+        result.push(object.create(name, data, traits));
     };
     return result;
 };
 /*
     See .build
  */
-object.buildArray = function(name, count, data) {
+object.buildArray = function(name, count, data, traits) {
     let result = [];
     count = count || 1;
     for(var i = 0; i < count; i++){
-        result.push(object.build(name, data));
+        result.push(object.build(name, data, traits));
     };
     return result;
 };

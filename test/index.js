@@ -26,6 +26,23 @@ var User = mongoose.model('User', mongoose.Schema({
     }
 }));
 
+var WithTrait = mongoose.model('WithTrait', mongoose.Schema({
+    body:  String,
+    text: String
+}));
+
+Factory.define('with.trait', WithTrait, function(lib) {
+    this.body = Random.hex(32);
+    this.text = Random.hex(32);
+
+    this.noText = function(){
+        delete this.text;
+    }
+    this.replaceText = function(value){
+        this.text = value;
+    }
+});
+
 Factory.define('user.meta', function(lib) {
     this.votes = Random.integer(0, 30);
     this.favs = Random.integer(0, 10);
@@ -73,6 +90,35 @@ function findUser(query){
         });
     });
 }
+it('no function property in resulting object', function * (){
+    let res = Factory.attributes('with.trait', {}, { noText: true });
+    expect(res.noText).eql(undefined);
+});
+
+describe('traits', function (){
+    it('applied without value', function * (){
+        let res = Factory.attributes('with.trait', {}, { noText: true });
+        expect(res.text).eql(undefined);
+    });
+    it('applied with value', function * (){
+        let res = Factory.attributes('with.trait', {}, { replaceText: 'new-value' });
+        expect(res.text).eql('new-value');
+    });
+
+    describe('predefined omit trait', function (){
+
+        it('applied as array', function * (){
+            let res = Factory.attributes('with.trait', {}, { omit: ['text', 'body'] });
+            expect(res.text).eql(undefined);
+            expect(res.body).eql(undefined);
+        });
+
+        it('applied as string', function * (){
+            let res = Factory.attributes('with.trait', {}, { omit: 'text' });
+            expect(res.text).eql(undefined);
+        });
+    });
+});
 
 describe('.define', function(){ 
     it('redefine error', function * (){
@@ -139,6 +185,10 @@ describe('.attributes', function(){
         let attributes = Factory.attributes('empty.attributes');
         expect(attributes).to.eql({});
     });
+    it('trait applied', function * (){
+        let res = Factory.attributes('with.trait', {}, { replaceText: 'new-value' });
+        expect(res.text).eql('new-value');
+    });
 });
 
 describe('.attributesArray', function(){
@@ -167,6 +217,10 @@ describe('.attributesArray', function(){
         let users = yield Factory.attributesArray('user');
         expect(users.length).to.eql(1);
     });
+    it('trait applied', function * (){
+        let res = Factory.attributesArray('with.trait', 1, {}, { replaceText: 'new-value' });
+        expect(res[0].text).eql('new-value');
+    });
 });
 
 
@@ -190,6 +244,11 @@ describe('.build', function(){
             Factory.build('user.meta');
         }).to.throw('Mongo factory user.meta is absctract. No mongoose model attached to it');
     });
+
+    it('trait applied', function * (){
+        let res = Factory.build('with.trait', {}, { replaceText: 'new-value' });
+        expect(res.text).eql('new-value');
+    });
 });
 
 describe('.buildArray', function(){
@@ -211,6 +270,11 @@ describe('.buildArray', function(){
         let users = yield Factory.buildArray('user');
         expect(users.length).to.eql(1);
     });
+
+    it('trait applied', function * (){
+        let res = Factory.buildArray('with.trait', 1, {}, { replaceText: 'new-value' });
+        expect(res[0].text).eql('new-value');
+    });
 });
 
 describe('.create', function(){
@@ -227,6 +291,11 @@ describe('.create', function(){
         expect(function(){
             Factory.create('user.meta'); //will throw same as build
         }).to.throw('Mongo factory user.meta is absctract. No mongoose model attached to it');
+    });
+
+    it('trait applied', function * (){
+        let res = yield Factory.create('with.trait', {}, { replaceText: 'new-value' });
+        expect(res.text).eql('new-value');
     });
 });
 
@@ -250,6 +319,11 @@ describe('.createArray', function(){
     it('default count is 1', function * (){
         let users = yield Factory.createArray('user');
         expect(users.length).to.eql(1);
+    });
+
+    it('trait applied', function * (){
+        let res = yield Factory.createArray('with.trait', 1, {}, { replaceText: 'new-value' });
+        expect(res[0].text).eql('new-value');
     });
 });
 
