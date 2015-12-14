@@ -15,32 +15,55 @@ let _ = require('lodash'),
     Define:
         Factory.define(<name>, <model>, <builder funciton>);
         Factory.define(<name>, <builder funciton>);
+        Factory.define([<name>, <name alias>, ... ], ...);
 
     Throw cases: 
         redefine
         builder function required
  */
-object.define = function(name, model, builderFunction) {
+object.define = function(nameMixed, model, builderFunction) {
     if (builderFunction === undefined) {
         builderFunction = model;
         model = null;
     }
-    if(object.registry[name] !== undefined){
-        throw new Error('Mongo factory ' + name + ' already defined');
+    if(!nameMixed) {
+        throw new Error('Mongo factory definition require factory name to be specified');
     }
-
     if(builderFunction === undefined){
-        throw new Error('Mongo factory ' + name + ' definition don\'t have builder function');
+        throw new Error('Mongo factory ' + nameMixed + ' definition don\'t have builder function');
     }
-    object.registry[name] = {
-        model: model,
-        builder: builderFunction
-    };
+    if(!Array.isArray(nameMixed)) {
+        nameMixed = [nameMixed];
+    }
+    for(let name of nameMixed) {
+        if(typeof name !== 'string') {
+            throw new Error('Mongo factory ' + name + ' definition name should be a string');
+        }
+        if(object.registry[name] !== undefined){
+            throw new Error('Mongo factory ' + name + ' already defined');
+        }
+        object.registry[name] = {
+            model: model,
+            builder: builderFunction
+        };
+    }
 }
 
 /*
     Actions
  */
+/*
+    Get model class by it's name
+
+    Clean:
+        Factory.model(<name>);
+ */
+object.model = function(name) {
+    if(!object.registry[name].model){
+        throw new Error('Mongo factory ' + name + ' is absctract. No mongoose model attached to it');
+    }
+    return object.registry[name].model;
+};
 /*
     Remove models from db by name
 

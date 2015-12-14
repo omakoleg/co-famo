@@ -24,9 +24,14 @@ Tests written with `co-mocha` and `chai.expect`
 
 # API
 
+#### Model
+ - `model(name)` - get mongoose model class
+
+
 #### Define
  - `define(name, model, builder)` - define new factory.
  - `define(name, builder)` - define new abstract factory. No build and create here
+ - `define([name, name2, name3], ... )` - define new factory with aliases.
  
 #### Attributes
  - `attributes(data)`
@@ -239,6 +244,15 @@ yield Factory.create('user');
 
 yield Factory.clean('user', {name: 'test'}); //will delete all users with name: test
 yield Factory.clean('user'); //will delete all users
+
+```
+
+## Get model class
+
+Throw exception if it is not models factory
+
+```
+let UserModel = Factory.model('user');
 
 ```
 

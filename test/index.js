@@ -11,7 +11,7 @@ mongoose.connect('mongodb://localhost/test-mongoose-factory');
 // mongoose.set('debug', true);
 
 var db = mongoose.connection;
-var User = mongoose.model('User', mongoose.Schema({
+var schema = mongoose.Schema({
     name:  String,
     body:   String,
     comments: [{ 
@@ -24,7 +24,9 @@ var User = mongoose.model('User', mongoose.Schema({
         votes: Number,
         favs:  Number
     }
-}));
+});
+schema.index({name: 1});
+var User = mongoose.model('User', schema);
 
 var WithTrait = mongoose.model('WithTrait', mongoose.Schema({
     body:  String,
@@ -128,7 +130,7 @@ describe('.define', function(){
         }).to.throw('Mongo factory redefine.me already defined');
     });
 
-    it('without builder funciton', function * (){
+    it('without builder function', function * (){
         expect(function(){
             Factory.define('no.builder');
         }).to.throw('Mongo factory no.builder definition don\'t have builder function');
@@ -140,6 +142,44 @@ describe('.define', function(){
         });
         // internals
         expect(Factory.registry['no.model'].model).to.eql(null);
+    });
+
+    it('with aliases', function * (){
+        Factory.define(['alias.model', 'alias.model.2'], function(lib) { });
+        // internals
+        expect(Factory.registry['alias.model']).to.not.eql(null);
+        expect(Factory.registry['alias.model.2']).to.not.eql(null);
+    });
+
+    it('with duplicate aliases', function * (){
+        expect(function(){
+            Factory.define(['alias.123', 'alias.123'], function(lib) { });
+        }).to.throw('Mongo factory alias.123 already defined');
+    });
+
+    it('with duplicate name', function * (){
+        Factory.define('model.asd', function(){ });
+        expect(function(){
+            Factory.define(['model.asd'], function(lib) { });
+        }).to.throw('Mongo factory model.asd already defined');
+    });
+
+    it('without name', function * (){
+        expect(function(){
+            Factory.define();
+        }).to.throw('Mongo factory definition require factory name to be specified');
+    });
+
+    it('with array of non string', function * (){
+        expect(function(){
+            Factory.define([1], function(){ });
+        }).to.throw('Mongo factory 1 definition name should be a string');
+    });
+
+    it('with non string name', function * (){
+        expect(function(){
+            Factory.define(1, function(){ });
+        }).to.throw('Mongo factory 1 definition name should be a string');
     });
 });
 
@@ -274,6 +314,13 @@ describe('.buildArray', function(){
     it('trait applied', function * (){
         let res = Factory.buildArray('with.trait', 1, {}, { replaceText: 'new-value' });
         expect(res[0].text).eql('new-value');
+    });
+});
+
+describe('.model', function(){
+    it('get user model', function * (){
+        let userModel = Factory.model('user');
+        expect(userModel).eql(User);
     });
 });
 
