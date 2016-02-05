@@ -123,6 +123,29 @@ describe('traits', function (){
 });
 
 describe('.define', function(){ 
+    describe('. With parent ', function() {
+
+        it('multiple inheritance', function * (){
+            expect(function(){
+                Factory.define('model.asd > bad > me', function(){ });
+            }).to.throw('Mongo factory model.asd > bad > me definition have multiple inheritance. Use only one parent.');
+        });
+
+        it('parent not defined', function * (){
+            expect(function(){
+                Factory.define('model.asd > bad', function(){ });
+            }).to.throw('Mongo factory bad parent not defined');
+        });
+
+        it('child already defined', function * (){
+            Factory.define('parent123', function(){ });
+            Factory.define('child123', function(){ });
+            expect(function(){
+                Factory.define('child123> parent123', function(){ });
+            }).to.throw('Mongo factory child123 already defined');
+        });
+    });
+
     it('redefine error', function * (){
         expect(function(){
             Factory.define('redefine.me', function(){} );
@@ -167,7 +190,7 @@ describe('.define', function(){
     it('without name', function * (){
         expect(function(){
             Factory.define();
-        }).to.throw('Mongo factory definition require factory name to be specified');
+        }).to.throw('Mongo factory Definition require factory name to be specified');
     });
 
     it('with array of non string', function * (){

@@ -33,6 +33,11 @@ Tests written with `co-mocha` and `chai.expect`
  - `define(name, builder)` - define new abstract factory. No build and create here
  - `define([name, name2, name3], ... )` - define new factory with aliases.
  
+Parameter name could specify `parent`, it will be used to populate paramenters before current factory. Object with those data will be used as `this` for current builder
+ - `define('child_name > parent_name', ... )` - define new factory with aliases.
+ - `define(['child_name > parent_name', 'child2 > parent2'], ... )` - define new factory with aliases.
+
+ 
 #### Attributes
  - `attributes(data)`
  - `attributes(data, traits)` - generate object using builder function
@@ -145,6 +150,22 @@ Factory.define('with.trait', function(lib) {
         this.computed =  this.text + this.body;
     }
 });
+```
+## Define factory with parent
+```
+Factory.define('parent', function(lib) {
+    this.parentId = Random.hex(32);
+});
+
+Factory.define('child > parent', function(lib) {
+    this.childId = Random.hex(32);
+});
+// as result it will create:
+{
+	parentId: ... ,
+	childId: ...
+}
+
 ```
 
 ## Define factory without model

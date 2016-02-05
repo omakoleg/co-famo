@@ -1,6 +1,7 @@
 'use strict';
 
 let _ = require('lodash'),
+    errorPrefix = 'Mongo factory ',
     object = {
         registry: []
     };
@@ -27,23 +28,38 @@ object.define = function(nameMixed, model, builderFunction) {
         model = null;
     }
     if(!nameMixed) {
-        throw new Error('Mongo factory definition require factory name to be specified');
+        throw new Error(errorPrefix + 'Definition require factory name to be specified');
     }
     if(builderFunction === undefined){
-        throw new Error('Mongo factory ' + nameMixed + ' definition don\'t have builder function');
+        throw new Error(errorPrefix + nameMixed + ' definition don\'t have builder function');
     }
     if(!Array.isArray(nameMixed)) {
         nameMixed = [nameMixed];
     }
     for(let name of nameMixed) {
         if(typeof name !== 'string') {
-            throw new Error('Mongo factory ' + name + ' definition name should be a string');
+            throw new Error(errorPrefix + name + ' definition name should be a string');
+        }
+        let parentName = null;
+        if(name.indexOf('>') !== -1) {
+            let parts = name.split('>').map(i => i.replace(/\s*/g, ''));
+            if(parts.length > 2) {
+                throw new Error(errorPrefix + name + 
+                    ' definition have multiple inheritance. Use only one parent.'
+                );
+            }
+            parentName = parts[1];
+            if(object.registry[parentName] === undefined){
+                throw new Error(errorPrefix + parentName + ' parent not defined');
+            }
+            name = parts[0];
         }
         if(object.registry[name] !== undefined){
-            throw new Error('Mongo factory ' + name + ' already defined');
+            throw new Error(errorPrefix + name + ' already defined');
         }
         object.registry[name] = {
             model: model,
+            parent: parentName,
             builder: builderFunction
         };
     }
@@ -60,7 +76,7 @@ object.define = function(nameMixed, model, builderFunction) {
  */
 object.model = function(name) {
     if(!object.registry[name].model){
-        throw new Error('Mongo factory ' + name + ' is absctract. No mongoose model attached to it');
+        throw new Error(errorPrefix + name + ' is absctract. No mongoose model attached to it');
     }
     return object.registry[name].model;
 };
@@ -73,7 +89,7 @@ object.model = function(name) {
  */
 object.clean = function(name, filter) {
     if(!object.registry[name].model){
-        throw new Error('Mongo factory ' + name + ' is absctract. No mongoose model attached to it');
+        throw new Error(errorPrefix + name + ' is absctract. No mongoose model attached to it');
     }
     filter = filter || {};
     return object.registry[name].model.remove(filter).exec();
@@ -89,7 +105,7 @@ object.clean = function(name, filter) {
  */
 object.build = function(name, data, traits) {
     if(!object.registry[name].model){
-        throw new Error('Mongo factory ' + name + ' is absctract. No mongoose model attached to it');
+        throw new Error(errorPrefix + name + ' is absctract. No mongoose model attached to it');
     }
     let attributes = object.attributes(name, data, traits);
     return new object.registry[name].model(attributes);
@@ -118,10 +134,16 @@ object.create = function(name, data, traits) {
  */
 object.attributes = function(name, data, traits) {
     if(object.registry[name] === undefined){
-        throw new Error('Mongo factory ' + name + ' is not defined. Use Factory.define() to define new factories');
+        throw new Error(errorPrefix + name + 
+            ' is not defined. Use Factory.define() to define new factories'
+        );
     }
+    let registry = object.registry[name];
     let temp = {};
-    object.registry[name].builder.call(temp, object);
+    if(registry.parentName) {
+        temp = object.attributes(parentName);
+    }
+    registry.builder.call(temp, object);
     // run each trait in context of builded object
     // pass trait value to function
     _.forOwn(traits, function(value, key){
