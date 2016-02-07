@@ -10,13 +10,13 @@ Async actions returns promise. This allow to use it in `koa` framework.
 # Installation
 
 To install simply use :
-```
+```javascript
 npm install p7s1-ctf/co-famo --save-dev
 // optional 
 npm install random-js --save-dev
 ```
 Run test suite to make sure it is working. Clone repository and run:
-```
+```javascript
 npm test
 ```
 Tests written with `co-mocha` and `chai.expect`
@@ -65,7 +65,7 @@ Parameter name could specify `parent`, it will be used to populate paramenters b
 ##### Note for generating entry values
 
 Prefferable to use `random-js` to generate each value as somehting random. 
-```
+```javascript
 let Random = require('random-js')();
 
 Factory.define('user.meta', function(lib) {
@@ -76,7 +76,7 @@ Factory.define('user.meta', function(lib) {
 ##### Best practice
 You can't know dynamic value of entry and can't rely on its value without directly specifying it.
 
-```
+```javascript
 Factory.define('user', function(lib) {
     this.votes = 30;
     this.body = 'abcdef';
@@ -97,7 +97,7 @@ expect(responseEntry.body).to.eql(attributes.body);
 
 Another example when we test expected value which we provided:
 
-```
+```javascript
 Factory.define('user', function(lib) {
     this.votes = 30;
     this.body = 'abcdef';
@@ -118,7 +118,7 @@ Define accept builder funciton with one argument which set to current factory ob
 
 Traits add custom functions to modify resulting object. They run in context `this` set to resulting object so you could reference `this.body` properties of result.
 Trait `{magic: '-join-'}` accept value passed as first argument and factory object as second.
-```
+```javascript
 Factory.define('etc', function(lib) {
     this.body = 'aaa';
     this.text = 'bbb';
@@ -135,7 +135,7 @@ Factory('etc', {}, {magic: '--'})
 
 So all public methods available to use:
 
-```
+```javascript
 Factory.define('something', function(lib) {
     this.subentry = lib.attributes('something.else');
     this.subentriesArray = lib.attributesArray('something.else.array', 2);
@@ -152,7 +152,7 @@ Factory.define('with.trait', function(lib) {
 });
 ```
 ## Define factory with parent
-```
+```javascript
 Factory.define('parent', function(lib) {
     this.parentId = Random.hex(32);
 });
@@ -169,7 +169,7 @@ Factory.define('child > parent', function(lib) {
 ```
 
 ## Define factory without model
-```
+```javascript
 Factory.define('requestAttributes', function(lib) {
     this.body = Random.hex(32);
     this.date = new Date();
@@ -179,7 +179,7 @@ Factory.define('requestAttributes', function(lib) {
 
 ## Define factory with model
 
-```
+```javascript
 var User = mongoose.model('User', mongoose.Schema({
     name:  String,
     body:   String,
@@ -193,11 +193,11 @@ Factory.define('user', User, function(lib) {
 
 ## Get attributes
 
-```
+```javascript
 let attrs = Factory.attributes('requestAttributes');
 ```
 or
-```
+```javascript
 let attrs = Factory.attributes('requestAttributes', {
 	body: 'some other value'
 });
@@ -206,7 +206,7 @@ let attrs = Factory.attributes('requestAttributes', {
 ## Build model 
 
 Could build only `model` entities.
-```
+```javascript
 var User = mongoose.model('User', mongoose.Schema({
     name:  String,
     age:  Number
@@ -223,7 +223,7 @@ let entityNotSaved = Factory.build('user', {
 // entityNotSaved - object
 ```
 Array version
-```
+```javascript
 let entitiesNotSaved = Factory.buildArray('user', {
 	age: 20
 }, 5);
@@ -233,7 +233,7 @@ let entitiesNotSaved = Factory.buildArray('user', {
 ## Create model 
 
 Could build only `model` entities. Will persist each object to mongo
-```
+```javascript
 var User = mongoose.model('User', mongoose.Schema({
     name:  String,
     age:  Number
@@ -250,7 +250,7 @@ let entitySaved = Factory.create('user', {
 // entitySaved - object
 ```
 Array version
-```
+```javascript
 let entitiesSaved = Factory.buildArray('user', {
 	age: 20
 }, 5);
@@ -259,7 +259,7 @@ let entitiesSaved = Factory.buildArray('user', {
 
 ## Clean entries
 
-```
+```javascript
 yield Factory.create('user', {name: 'test'});
 yield Factory.create('user');
 
@@ -272,7 +272,7 @@ yield Factory.clean('user'); //will delete all users
 
 Throw exception if it is not models factory
 
-```
+```javascript
 let UserModel = Factory.model('user');
 
 ```
@@ -280,9 +280,6 @@ let UserModel = Factory.model('user');
 
 #TODO
 
-- traits
-- accept options
-- list all
 - get one
 
 
