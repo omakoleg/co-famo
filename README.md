@@ -186,7 +186,7 @@ var User = mongoose.model('User', mongoose.Schema({
 }));
 
 Factory.define('user', User, function(lib) {
-    this.name = 'test user;
+    this.name = 'test user';
     this.body = 'something';
 });
 ```
@@ -213,7 +213,7 @@ var User = mongoose.model('User', mongoose.Schema({
 }));
 
 Factory.define('user', User, function(lib) {
-    this.name = 'test user;
+    this.name = 'test user';
     this.age = 30;
 });
 
@@ -240,7 +240,7 @@ var User = mongoose.model('User', mongoose.Schema({
 }));
 
 Factory.define('user', User, function(lib) {
-    this.name = 'test user;
+    this.name = 'test user';
     this.age = 30;
 });
 
