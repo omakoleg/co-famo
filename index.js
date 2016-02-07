@@ -37,32 +37,36 @@ object.define = function(nameMixed, model, builderFunction) {
         nameMixed = [nameMixed];
     }
     for(let name of nameMixed) {
-        if(typeof name !== 'string') {
-            throw new Error(errorPrefix + name + ' definition name should be a string');
-        }
-        let parentName = null;
-        if(name.indexOf('>') !== -1) {
-            let parts = name.split('>').map(i => i.replace(/\s*/g, ''));
-            if(parts.length > 2) {
-                throw new Error(errorPrefix + name + 
-                    ' definition have multiple inheritance. Use only one parent.'
-                );
-            }
-            parentName = parts[1];
-            if(object.registry[parentName] === undefined){
-                throw new Error(errorPrefix + parentName + ' parent not defined');
-            }
-            name = parts[0];
-        }
-        if(object.registry[name] !== undefined){
-            throw new Error(errorPrefix + name + ' already defined');
-        }
-        object.registry[name] = {
-            model: model,
-            parent: parentName,
-            builder: builderFunction
-        };
+        object.defineSingle(name, model, builderFunction);
     }
+}
+
+object.defineSingle = function(name, model, builderFunction) {
+    if(typeof name !== 'string') {
+        throw new Error(errorPrefix + name + ' definition name should be a string');
+    }
+    let parentName = null;
+    if(name.indexOf('>') !== -1) {
+        let parts = name.split('>').map(i => i.replace(/\s*/g, ''));
+        if(parts.length > 2) {
+            throw new Error(errorPrefix + name + 
+                ' definition have multiple inheritance. Use only one parent.'
+            );
+        }
+        parentName = parts[1];
+        if(object.registry[parentName] === undefined){
+            throw new Error(errorPrefix + parentName + ' parent not defined');
+        }
+        name = parts[0];
+    }
+    if(object.registry[name] !== undefined){
+        throw new Error(errorPrefix + name + ' already defined');
+    }
+    object.registry[name] = {
+        model: model,
+        parent: parentName,
+        builder: builderFunction
+    };
 }
 
 /*
