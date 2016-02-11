@@ -144,8 +144,8 @@ object.attributes = function(name, data, traits) {
     }
     let registry = object.registry[name];
     let temp = {};
-    if(registry.parentName) {
-        temp = object.attributes(parentName);
+    if(registry.parent) {
+        temp = object.attributes(registry.parent);
     }
     registry.builder.call(temp, object);
     // run each trait in context of builded object
