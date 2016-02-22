@@ -11,7 +11,7 @@ Async actions returns promise. This allow to use it in `koa` framework.
 
 To install simply use :
 ```javascript
-npm install p7s1-ctf/co-famo --save-dev
+npm install co-famo --save-dev
 // optional 
 npm install random-js --save-dev
 ```
