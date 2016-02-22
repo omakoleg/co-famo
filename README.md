@@ -15,7 +15,13 @@ npm install co-famo --save-dev
 // optional 
 npm install random-js --save-dev
 ```
-Run test suite to make sure it is working. Clone repository and run:
+### Runnign tests
+
+Running tests require running mongo database. It is using mongoose. It will connect using connection string by default:
+```
+mongodb://localhost/test-mongoose-factory
+```
+Then run
 ```javascript
 npm test
 ```
