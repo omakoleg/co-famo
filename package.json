@@ -1,6 +1,6 @@
 {
   "name": "co-famo",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Simple npm for creating mongoose models in test cases.",
   "main": "index.js",
   "directories": {
