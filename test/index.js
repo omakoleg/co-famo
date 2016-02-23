@@ -5,12 +5,18 @@ require('co-mocha');
 let mongoose = require('mongoose'),
     Random = require('random-js')(),
     assert = require('assert'),
+    mockgoose = require('mockgoose'),
     Factory = require('../');
 
-mongoose.connect('mongodb://localhost/test-mongoose-factory');
+mockgoose(mongoose);
+
+before(function(done) {
+    mongoose.connect('mongodb://example.com/TestingDB', function(err) {
+        done(err);
+    });
+});
 // mongoose.set('debug', true);
 
-var db = mongoose.connection;
 var schema = mongoose.Schema({
     name:  String,
     body:   String,
@@ -25,7 +31,6 @@ var schema = mongoose.Schema({
         favs:  Number
     }
 });
-schema.index({name: 1});
 var User = mongoose.model('User', schema);
 
 var WithTrait = mongoose.model('WithTrait', mongoose.Schema({
@@ -411,9 +416,3 @@ describe('.createArray', function(){
         assert.equal(res[0].text, 'new-value');
     });
 });
-
-
-
-
-
-
