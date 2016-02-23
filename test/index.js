@@ -4,7 +4,7 @@ require('co-mocha');
 
 let mongoose = require('mongoose'),
     Random = require('random-js')(),
-    expect = require('chai').expect,
+    assert = require('assert'),
     Factory = require('../');
 
 mongoose.connect('mongodb://localhost/test-mongoose-factory');
@@ -46,8 +46,8 @@ Factory.define('with.trait', WithTrait, function(lib) {
 });
 
 Factory.define('user.meta', function(lib) {
-    this.votes = Random.integer(0, 30);
-    this.favs = Random.integer(0, 10);
+    this.votes = Random.integer(1, 30);
+    this.favs = Random.integer(1, 10);
 });
 
 Factory.define('user.comment', function(lib) {
@@ -64,21 +64,32 @@ Factory.define('user', User, function(lib) {
 });
 
 function expectUser(attributes) {
-    expect(attributes.name).to.match(/[0-9a-f]{32}/);
-    expect(attributes.body).to.match(/[0-9a-f]{40}/);
-    expect(attributes.comments.length).to.equal(3);
-    expect(typeof attributes.date).to.equal('object');
-    expect(attributes.hidden).to.eql(false);
-    expect(attributes.meta.votes).to.match(/[0-9]{1,}/);
-    expect(attributes.meta.favs).to.match(/[0-9]{1,}/);
+    // name
+    assert.equal(attributes.name.length, 32);
+    assert.equal(typeof attributes.name, 'string');
+    // body
+    assert.equal(attributes.body.length, 40);
+    assert.equal(typeof attributes.body, 'string');
+    // comments
+    assert.strictEqual(attributes.comments.length, 3);
+    // date
+    assert.equal(typeof attributes.date, 'object');
+    // hidden
+    assert.strictEqual(attributes.hidden, false);
+    // votes
+    assert(attributes.meta.votes > 0);
+    assert.equal(typeof attributes.meta.votes, 'number');
+    // favs
+    assert(attributes.meta.favs > 0);
+    assert.equal(typeof attributes.meta.favs, 'number');
 }
 function expectUserEqual(user, expected) {
-    expect(user.name).to.eql(expected.name);
-    expect(user.body).to.eql(expected.body);
-    expect(user.comments.length).to.equal(expected.comments.length);
-    expect(user.hidden).to.eql(expected.hidden);
-    expect(user.meta.favs).to.eql(expected.meta.favs);
-    expect(user.meta.votes).to.eql(expected.meta.votes);
+    assert.equal(user.name, expected.name);
+    assert.equal(user.body, expected.body);
+    assert.equal(user.comments.length, expected.comments.length);
+    assert.equal(user.hidden, expected.hidden);
+    assert.equal(user.meta.favs, expected.meta.favs);
+    assert.equal(user.meta.votes, expected.meta.votes);
 }
 
 function findUser(query){
@@ -94,30 +105,30 @@ function findUser(query){
 }
 it('no function property in resulting object', function * (){
     let res = Factory.attributes('with.trait', {}, { noText: true });
-    expect(res.noText).eql(undefined);
+    assert.strictEqual(res.noText, undefined);
 });
 
 describe('traits', function (){
     it('applied without value', function * (){
         let res = Factory.attributes('with.trait', {}, { noText: true });
-        expect(res.text).eql(undefined);
+        assert.strictEqual(res.text, undefined);
     });
     it('applied with value', function * (){
         let res = Factory.attributes('with.trait', {}, { replaceText: 'new-value' });
-        expect(res.text).eql('new-value');
+        assert.equal(res.text, 'new-value');
     });
 
     describe('predefined omit trait', function (){
 
         it('applied as array', function * (){
             let res = Factory.attributes('with.trait', {}, { omit: ['text', 'body'] });
-            expect(res.text).eql(undefined);
-            expect(res.body).eql(undefined);
+            assert.strictEqual(res.text, undefined);
+            assert.strictEqual(res.body, undefined);
         });
 
         it('applied as string', function * (){
             let res = Factory.attributes('with.trait', {}, { omit: 'text' });
-            expect(res.text).eql(undefined);
+            assert.strictEqual(res.text, undefined);
         });
     });
 });
@@ -126,37 +137,37 @@ describe('.define', function(){
     describe('. With parent ', function() {
 
         it('multiple inheritance', function * (){
-            expect(function(){
+            assert.throws(function(){
                 Factory.define('model.asd > bad > me', function(){ });
-            }).to.throw('Mongo factory model.asd > bad > me definition have multiple inheritance. Use only one parent.');
+            }, 'Mongo factory model.asd > bad > me definition have multiple inheritance. Use only one parent.');
         });
 
         it('parent not defined', function * (){
-            expect(function(){
+            assert.throws(function(){
                 Factory.define('model.asd > bad', function(){ });
-            }).to.throw('Mongo factory bad parent not defined');
+            }, 'Mongo factory bad parent not defined');
         });
 
         it('child already defined', function * (){
             Factory.define('parent123', function(){ });
             Factory.define('child123', function(){ });
-            expect(function(){
+            assert.throws(function(){
                 Factory.define('child123> parent123', function(){ });
-            }).to.throw('Mongo factory child123 already defined');
+            }, 'Mongo factory child123 already defined');
         });
     });
 
     it('redefine error', function * (){
-        expect(function(){
+        assert.throws(function(){
             Factory.define('redefine.me', function(){} );
             Factory.define('redefine.me', function(){} ); //throw
-        }).to.throw('Mongo factory redefine.me already defined');
+        }, 'Mongo factory redefine.me already defined');
     });
 
     it('without builder function', function * (){
-        expect(function(){
+        assert.throws(function(){
             Factory.define('no.builder');
-        }).to.throw('Mongo factory no.builder definition don\'t have builder function');
+        }, 'Mongo factory no.builder definition don\'t have builder function');
     });
 
     it('without model', function * (){
@@ -164,45 +175,45 @@ describe('.define', function(){
             this.id = 1;
         });
         // internals
-        expect(Factory.registry['no.model'].model).to.eql(null);
+        assert.equal(Factory.registry['no.model'].model, null);
     });
 
     it('with aliases', function * (){
         Factory.define(['alias.model', 'alias.model.2'], function(lib) { });
         // internals
-        expect(Factory.registry['alias.model']).to.not.eql(null);
-        expect(Factory.registry['alias.model.2']).to.not.eql(null);
+        assert.notEqual(Factory.registry['alias.model'], null);
+        assert.notEqual(Factory.registry['alias.model.2'], null);
     });
 
     it('with duplicate aliases', function * (){
-        expect(function(){
+        assert.throws(function(){
             Factory.define(['alias.123', 'alias.123'], function(lib) { });
-        }).to.throw('Mongo factory alias.123 already defined');
+        }, 'Mongo factory alias.123 already defined');
     });
 
     it('with duplicate name', function * (){
         Factory.define('model.asd', function(){ });
-        expect(function(){
+        assert.throws(function(){
             Factory.define(['model.asd'], function(lib) { });
-        }).to.throw('Mongo factory model.asd already defined');
+        }, 'Mongo factory model.asd already defined');
     });
 
     it('without name', function * (){
-        expect(function(){
+        assert.throws(function(){
             Factory.define();
-        }).to.throw('Mongo factory Definition require factory name to be specified');
+        }, 'Mongo factory Definition require factory name to be specified');
     });
 
     it('with array of non string', function * (){
-        expect(function(){
+        assert.throws(function(){
             Factory.define([1], function(){ });
-        }).to.throw('Mongo factory 1 definition name should be a string');
+        }, 'Mongo factory 1 definition name should be a string');
     });
 
     it('with non string name', function * (){
-        expect(function(){
+        assert.throws(function(){
             Factory.define(1, function(){ });
-        }).to.throw('Mongo factory 1 definition name should be a string');
+        }, 'Mongo factory 1 definition name should be a string');
     });
 });
 
@@ -212,10 +223,10 @@ describe('.clean', function(){
         yield Factory.create('user');
         yield Factory.create('user');
         let cnt = yield User.count().exec(); // 2
-        expect(cnt).to.eql(2);
+        assert.equal(cnt, 2);
         yield Factory.clean('user'); // clean
         let cntClean = yield User.count().exec();
-        expect(cntClean).to.eql(0); // 0
+        assert.equal(cntClean, 0); // 0
     });
 
     it('by query', function * (){
@@ -223,10 +234,10 @@ describe('.clean', function(){
         yield Factory.create('user', {name: 'test'});
         yield Factory.create('user');
         let cnt = yield User.count().exec();
-        expect(cnt).to.eql(2);
+        assert.equal(cnt, 2);
         yield Factory.clean('user', {name: 'test'});
         let cntClean = yield User.count().exec();
-        expect(cntClean).to.eql(1);
+        assert.equal(cntClean, 1);
     });
 });
 
@@ -241,23 +252,23 @@ describe('.attributes', function(){
             this.votes = Random.integer(0, 30);
         });
         let attributes = Factory.attributes('abstract.attributes');
-        expect(attributes.votes).to.match(/[0-9]{1,}/);
+        assert.equal(typeof attributes.votes, 'number');
     });
     it('set empty attributes', function * (){
         Factory.define('empty.attributes', User, function() { });
         let attributes = Factory.attributes('empty.attributes');
-        expect(attributes).to.eql({});
+        assert.deepEqual(attributes, {});
     });
     it('trait applied', function * (){
         let res = Factory.attributes('with.trait', {}, { replaceText: 'new-value' });
-        expect(res.text).eql('new-value');
+        assert.equal(res.text, 'new-value');
     });
 });
 
 describe('.attributesArray', function(){
     it('set user attributes', function * (){
         let attributes = Factory.attributesArray('user', 2);
-        expect(attributes.length).to.eql(2);
+        assert.equal(attributes.length, 2);
         attributes = attributes[0];
         expectUser(attributes);
     });
@@ -267,22 +278,22 @@ describe('.attributesArray', function(){
             this.votes = Random.integer(0, 30);
         });
         let attributes = Factory.attributesArray('abstract.attributesArray', 1);
-        expect(attributes[0].votes).to.match(/[0-9]{1,}/);
+        assert.equal(typeof attributes[0].votes, 'number');
     });
     it('set empty attributes', function * (){
         Factory.define('empty.attributesArray', User, function() { });
         let attributes = Factory.attributesArray('empty.attributesArray', 2);
-        expect(attributes.length).to.eql(2);
-        expect(attributes[0]).to.eql({});
+        assert.equal(attributes.length, 2);
+        assert.deepEqual(attributes[0], {});
     });
 
     it('default count is 1', function * (){
         let users = yield Factory.attributesArray('user');
-        expect(users.length).to.eql(1);
+        assert.equal(users.length, 1);
     });
     it('trait applied', function * (){
         let res = Factory.attributesArray('with.trait', 1, {}, { replaceText: 'new-value' });
-        expect(res[0].text).eql('new-value');
+        assert.equal(res[0].text, 'new-value');
     });
 });
 
@@ -290,27 +301,31 @@ describe('.attributesArray', function(){
 describe('.build', function(){
     it('user entry', function * (){
         let user = Factory.build('user');
-        expect(typeof user.toJSON()).to.eql('object');
+        assert.equal(typeof user.toJSON(), 'object');
         expectUser(user);
     });
 
     it('user internal entries are build', function * (){
         let user = Factory.build('user');
         expectUser(user);
-        expect(user.meta).to.not.eql(null);
-        expect(user.meta.votes).to.match(/[0-9]{1,}/);
-        expect(user.meta.favs).to.match(/[0-9]{1,}/);
+        assert.notEqual(user.meta, null);
+        // votes
+        assert(user.meta.votes > 0);
+        assert.equal(typeof user.meta.votes, 'number');
+        // favs
+        assert(user.meta.favs > 0);
+        assert.equal(typeof user.meta.favs, 'number');
     });
 
     it('user.meta entry throw an error', function * (){
-        expect(function(){
+        assert.throws(function(){
             Factory.build('user.meta');
-        }).to.throw('Mongo factory user.meta is absctract. No mongoose model attached to it');
+        }, 'Mongo factory user.meta is absctract. No mongoose model attached to it');
     });
 
     it('trait applied', function * (){
         let res = Factory.build('with.trait', {}, { replaceText: 'new-value' });
-        expect(res.text).eql('new-value');
+        assert.equal(res.text, 'new-value');
     });
 });
 
@@ -320,52 +335,52 @@ describe('.buildArray', function(){
         let users = yield Factory.buildArray('user'); // build 1
         expectUser(users[0]);
         let cntMongo = yield User.count();
-        expect(cntMongo).to.eql(0);
+        assert.equal(cntMongo, 0);
     });
 
     it('user.meta entry', function * (){
-        expect(function(){
+        assert.throws(function(){
             Factory.buildArray('user.meta'); //will throw same as build
-        }).to.throw('Mongo factory user.meta is absctract. No mongoose model attached to it');
+        }, 'Mongo factory user.meta is absctract. No mongoose model attached to it');
     });
 
     it('default count is 1', function * (){
         let users = yield Factory.buildArray('user');
-        expect(users.length).to.eql(1);
+        assert.equal(users.length, 1);
     });
 
     it('trait applied', function * (){
         let res = Factory.buildArray('with.trait', 1, {}, { replaceText: 'new-value' });
-        expect(res[0].text).eql('new-value');
+        assert.equal(res[0].text, 'new-value');
     });
 });
 
 describe('.model', function(){
     it('get user model', function * (){
         let userModel = Factory.model('user');
-        expect(userModel).eql(User);
+        assert.deepEqual(userModel, User);
     });
 });
 
 describe('.create', function(){
     it('user entry', function * (){
         let user = yield Factory.create('user');
-        expect(user._id).to.match(/[0-9a-f]{10,}/);
-        expect(typeof user.toJSON()).to.eql('object');
+        assert(/[0-9a-f]{10,}/.test(user._id));
+        assert.equal(typeof user.toJSON(), 'object');
         expectUser(user);
         let userMongo = yield User.findById(user._id).exec();
         expectUserEqual(user, userMongo.toObject());
     });
 
     it('user.meta entry', function * (){
-        expect(function(){
+        assert.throws(function(){
             Factory.create('user.meta'); //will throw same as build
-        }).to.throw('Mongo factory user.meta is absctract. No mongoose model attached to it');
+        }, 'Mongo factory user.meta is absctract. No mongoose model attached to it');
     });
 
     it('trait applied', function * (){
         let res = yield Factory.create('with.trait', {}, { replaceText: 'new-value' });
-        expect(res.text).eql('new-value');
+        assert.equal(res.text, 'new-value');
     });
 });
 
@@ -373,27 +388,27 @@ describe('.createArray', function(){
     it('user entry', function * (){
         yield Factory.clean('user'); // clean all
         let users = yield Factory.createArray('user', 2);
-        expect(users.length).to.eql(2);
-        expect(users[0]._id).to.match(/[0-9a-f]{10,}/);
-        expect(users[1]._id).to.match(/[0-9a-f]{10,}/);
+        assert.equal(users.length,2);
+        assert.notEqual(users[0]._id, undefined);
+        assert.notEqual(users[1]._id, undefined);
         expectUser(users[0]);
         expectUser(users[1]);
     });
 
     it('user.meta entry', function * (){
-        expect(function(){
+        assert.throws(function(){
             Factory.createArray('user.meta', 2); //will throw same as build
-        }).to.throw('Mongo factory user.meta is absctract. No mongoose model attached to it');
+        }, 'Mongo factory user.meta is absctract. No mongoose model attached to it');
     });
 
     it('default count is 1', function * (){
         let users = yield Factory.createArray('user');
-        expect(users.length).to.eql(1);
+        assert.equal(users.length, 1);
     });
 
     it('trait applied', function * (){
         let res = yield Factory.createArray('with.trait', 1, {}, { replaceText: 'new-value' });
-        expect(res[0].text).eql('new-value');
+        assert.equal(res[0].text, 'new-value');
     });
 });
 
