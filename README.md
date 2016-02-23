@@ -17,16 +17,11 @@ npm install random-js --save-dev
 ```
 ### Runnign tests
 
-Running tests require running mongo database. It is using mongoose. It will connect using connection string by default:
-```
-mongodb://localhost/test-mongoose-factory
-```
-Then run
+Running tests do not require mongo to be installed. Tests use mockgoose for it.
 ```javascript
 npm test
 ```
-Tests written with `co-mocha` and `chai.expect`
-
+Tests written with `co-mocha`
 
 # API
 
