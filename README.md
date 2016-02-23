@@ -1,5 +1,7 @@
 # About
 
+![https://travis-ci.org/omakoleg/co-famo](https://travis-ci.org/omakoleg/co-famo.svg?branch=master)
+
 Simple npm for creating mongoose models in test cases.
 Async actions returns promise. This allow to use it in `koa` framework. 
 
