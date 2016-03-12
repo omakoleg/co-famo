@@ -284,9 +284,19 @@ describe('.clean', function(){
 });
 
 describe('.object', function(){
-    it('pending');
-
-    it('do not remove functions from object');
+    it('do not remove functions from object', function* (){
+        Factory.define('user452345234', function() {
+            this.name = 'my name';
+            this.setId = function() {
+                this.id213 = 123;
+            };
+        });
+        let object = Factory.object('user452345234');
+        assert.equal(object.name, 'my name');
+        assert.equal(typeof object.setId, 'function');
+        object.setId();
+        assert.equal(object.id213, 123);
+    });
 });
 
 describe('.attributes', function(){
