@@ -124,6 +124,41 @@ describe('traits', function (){
     });
 });
 
+describe('dynamic traits', function() {
+
+    it('works', function * (){
+        Factory.traits.custom = function(mixedValue, attributes) {
+            attributes._id = 'some-id-' + mixedValue;
+        };
+        Factory.define('user-12332', function(lib) {
+            this.name = 'test user';
+        });
+        let userWithId = Factory.attributes('user-12332', {}, { custom: '10'});
+        assert.equal(userWithId.name, 'test user');
+        assert.equal(userWithId._id, 'some-id-10');
+        delete Factory.traits.custom;
+    });
+
+    it('could be redefined', function * (){
+        Factory.traits.custom = function(mixedValue, attributes) {
+            attributes._id = 'some-id-' + mixedValue;
+        };
+        Factory.define('user233456', function(lib) {
+            this.name = 'test user';
+        });
+        let userWithId = Factory.attributes('user233456', {}, { custom: '10'});
+        Factory.traits.custom = function(mixedValue, attributes) {
+            attributes._id = 'some-other-id-' + mixedValue;
+        };
+        assert.equal(userWithId._id, 'some-id-10');
+
+        let userWithOtherId = Factory.attributes('user233456', {}, { custom: '10'});
+        assert.equal(userWithOtherId._id, 'some-other-id-10');
+
+        delete Factory.traits.custom;
+    });
+});
+
 describe('predefined traits ', function (){
 
     describe('omit ', function (){

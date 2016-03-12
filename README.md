@@ -40,10 +40,16 @@ Parameter name could specify `parent`, it will be used to populate paramenters b
  - `define('child_name > parent_name', ... )` - define new factory with aliases.
  - `define(['child_name > parent_name', 'child2 > parent2'], ... )` - define new factory with aliases.
 
- 
+#### Object
+Will keep all defined traits in object
+ - `object(name)` - create obejct from factory attributes
+ - `object(name, data)` - create object with attributes owervritten dey `data` values 
+ - `object(name, data, traits)` - generate object using builder function
+
 #### Attributes
- - `attributes(data)`
- - `attributes(data, traits)` - generate object using builder function
+ - `attributes(name)` - create object with attributes
+ - `attributes(name, data)` - create object with specific data
+ - `attributes(name, data, traits)` - generate object using builder function
  
 #### Build
  - `build(name)`
@@ -279,8 +285,27 @@ Throw exception if it is not models factory
 let UserModel = Factory.model('user');
 
 ```
+## Create custom global traits
 
+```javascript
+// Use property to define trait
+Factory.traits.custom = function(mixedValue, attributes) {
+	attributes._id = 'some-id-' + mixedValue;
+};
+// define factory
+Factory.define('user', function(lib) {
+    this.name = 'test user';
+});
+// create object with trait
+let userWithId = Factory.attributes('user', {}, { custom: '10'});
+/* userWithId:
+{
+  name: 'test user',
+  _id: 'some-id-10'
+}
+*/
 
+```
 # TODO
 
 - get one
