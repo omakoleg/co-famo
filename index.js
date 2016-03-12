@@ -1,7 +1,6 @@
 'use strict';
 
-let _ = require('lodash'),
-    errorPrefix = 'Mongo factory ',
+let errorPrefix = 'Mongo factory ',
     object = {
         registry: []
     };
@@ -137,6 +136,19 @@ object.create = function(name, data, traits) {
         factory not defined
  */
 object.attributes = function(name, data, traits) {
+    // proxy to 'object'
+    let result = object.object(name, data, traits);
+    // clean functions
+    Object.keys(result).forEach(function(key) {
+        if(typeof result[key] === 'function') {
+            delete result[key];
+        }
+    });
+    // return object without functions
+    return result;
+};
+
+object.object = function(name, data, traits) {
     if(object.registry[name] === undefined){
         throw new Error(errorPrefix + name + 
             ' is not defined. Use Factory.define() to define new factories'
@@ -150,24 +162,46 @@ object.attributes = function(name, data, traits) {
     registry.builder.call(temp, object);
     // run each trait in context of builded object
     // pass trait value to function
-    _.forOwn(traits, function(value, key){
-        if(key === 'omit'){
-            if(_.isArray(value)){
-                value.forEach(function(omitValue){
-                    delete temp[omitValue.toString()];
-                });
-            } else {
-                delete temp[value.toString()];
-            }
-        } else if(_.isFunction(temp[key])){
+    traits = traits || {}; //default value
+    // list registered traits
+    let registeredTraits = Object.keys(object.traits);
+    // iterate over list and apply function trait
+    Object.keys(traits).forEach(function(key) {
+        let value = traits[key];
+        // check trait defined globally
+        if(registeredTraits.indexOf(key) !== -1) {
+            object.traits[key](value, temp);
+        // check trait is for factory only
+        } else if(typeof temp[key] === 'function') {
             temp[key].call(temp, value, object);
+        // no trait found
+        } else {
+            throw new Error(errorPrefix +  key + 
+                ' trait is not defined. Use function declaration within Factory.define() to define new trait'
+            );
         }
     });
-    // clean functions
-    temp = _.pick(temp, function(value){
-        return !_.isFunction(value);
-    });
-    return _.merge(temp, data || {});
+
+    return Object.assign({}, temp, data || {});
+};
+
+/*
+    List of registered (global) traits
+    Each trait accept value passed to it whaen called and temporary attributes object
+    which could be modified by trait before returning back or using in build/create
+ */
+object.traits = {
+    /*
+        Remove listed keys from resulted object
+     */
+    omit: function(mixedValue, atributes) {
+        if(!Array.isArray(mixedValue)) {
+            mixedValue = [mixedValue];
+        }
+        mixedValue.forEach(function(omitValue){
+            delete atributes[omitValue.toString()];
+        });
+    }
 };
 /*
     Bulk actions

@@ -122,9 +122,11 @@ describe('traits', function (){
         let res = Factory.attributes('with.trait', {}, { replaceText: 'new-value' });
         assert.equal(res.text, 'new-value');
     });
+});
 
-    describe('predefined omit trait', function (){
+describe('predefined traits ', function (){
 
+    describe('omit ', function (){
         it('applied as array', function * (){
             let res = Factory.attributes('with.trait', {}, { omit: ['text', 'body'] });
             assert.strictEqual(res.text, undefined);
@@ -244,6 +246,12 @@ describe('.clean', function(){
         let cntClean = yield User.count().exec();
         assert.equal(cntClean, 1);
     });
+});
+
+describe('.object', function(){
+    it('pending');
+
+    it('do not remove functions from object');
 });
 
 describe('.attributes', function(){
