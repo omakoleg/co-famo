@@ -1,6 +1,6 @@
 {
   "name": "co-famo",
-  "version": "1.0.11",
+  "version": "1.1.0",
   "description": "Simple npm for creating mongoose models in test cases.",
   "main": "index.js",
   "directories": {
@@ -13,8 +13,7 @@
     "mongoose": "*",
     "random-js": "*"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "scripts": {
     "test": "node_modules/.bin/mocha --recursive"
   },
