@@ -113,6 +113,45 @@ it('no function property in resulting object', function * (){
     assert.strictEqual(res.noText, undefined);
 });
 
+describe('merging data', function (){
+    it('do deep merge object', function * (){
+        Factory.define('user-345234523', function(lib) {
+            this.first = {
+                second: {
+                    third: 1
+                }
+            };
+        });
+        let mergedData = Factory.attributes('user-345234523', {
+            first: {
+                second: {
+                    fourth: 2
+                }
+            }
+        });
+        assert.deepEqual(mergedData, {
+            first: {
+                second: {
+                    third: 1,
+                    fourth: 2
+                }
+            }
+        });
+    });
+
+    it('do not deep merge array', function * (){
+        Factory.define('user-624dfg34', function(lib) {
+            this.first = [ 1 ];
+        });
+        let mergedData = Factory.attributes('user-624dfg34', {
+            first: [ 2 ]
+        });
+        assert.deepEqual(mergedData, {
+            first: [ 2 ]
+        });
+    });
+});
+
 describe('traits', function (){
     it('applied without value', function * (){
         let res = Factory.attributes('with.trait', {}, { noText: true });

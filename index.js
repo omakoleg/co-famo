@@ -1,7 +1,9 @@
 'use strict';
 
 let errorPrefix = 'Mongo factory ',
+    merge = require('lodash.merge'),
     cofamo = {};
+
 /*
     registry: [{
         model: User reference to mongo object
@@ -200,7 +202,7 @@ cofamo.object = function(name, data, traits) {
         }
     });
 
-    return Object.assign({}, temp, data || {});
+    return merge(temp, data || {});
 };
 /*
     Bulk actions
