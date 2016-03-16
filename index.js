@@ -58,7 +58,7 @@ cofamo.define = function(nameMixed, model, builderFunction) {
     for(let name of nameMixed) {
         cofamo.defineSingle(name, model, builderFunction);
     }
-}
+};
 
 cofamo.defineSingle = function(name, model, builderFunction) {
     if(typeof name !== 'string') {
@@ -86,7 +86,7 @@ cofamo.defineSingle = function(name, model, builderFunction) {
         parent: parentName,
         builder: builderFunction
     };
-}
+};
 
 /*
     Actions
@@ -215,7 +215,7 @@ cofamo.attributesArray = function(name, count, data, traits) {
     count = count || 1;
     for(var i = 0; i < count; i++){
         result.push(cofamo.attributes(name, data, traits));
-    };
+    }
     return result;
 }; 
 /*
@@ -226,7 +226,7 @@ cofamo.createArray = function(name, count, data, traits) {
     count = count || 1;
     for(var i = 0; i < count; i++){
         result.push(cofamo.create(name, data, traits));
-    };
+    }
     return result;
 };
 /*
@@ -237,7 +237,7 @@ cofamo.buildArray = function(name, count, data, traits) {
     count = count || 1;
     for(var i = 0; i < count; i++){
         result.push(cofamo.build(name, data, traits));
-    };
+    }
     return result;
 };
 

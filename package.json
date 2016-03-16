@@ -1,6 +1,6 @@
 {
   "name": "co-famo",
-  "version": "1.0.11",
+  "version": "1.1.1",
   "description": "Simple npm for creating mongoose models in test cases.",
   "main": "index.js",
   "directories": {
@@ -8,6 +8,7 @@
   },
   "devDependencies": {
     "co-mocha": "^1.1.2",
+    "jshint": "^2.9.1",
     "mocha": "*",
     "mockgoose": "^5.3.2",
     "mongoose": "*",
@@ -17,7 +18,8 @@
     "lodash.merge": "^4.3.2"
   },
   "scripts": {
-    "test": "node_modules/.bin/mocha --recursive"
+    "test": "node_modules/.bin/mocha --recursive",
+    "jshint": "jshint *.js && jshint test/*.js"
   },
   "repository": {
     "type": "git",

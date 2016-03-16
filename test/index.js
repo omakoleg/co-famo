@@ -38,24 +38,24 @@ var WithTrait = mongoose.model('WithTrait', mongoose.Schema({
     text: String
 }));
 
-Factory.define('with.trait', WithTrait, function(lib) {
+Factory.define('with.trait', WithTrait, function() {
     this.body = Random.hex(32);
     this.text = Random.hex(32);
 
     this.noText = function(){
         delete this.text;
-    }
+    };
     this.replaceText = function(value){
         this.text = value;
-    }
+    };
 });
 
-Factory.define('user.meta', function(lib) {
+Factory.define('user.meta', function() {
     this.votes = Random.integer(1, 30);
     this.favs = Random.integer(1, 10);
 });
 
-Factory.define('user.comment', function(lib) {
+Factory.define('user.comment', function() {
     this.body = Random.hex(32);
     this.date = new Date();
 });
@@ -97,17 +97,6 @@ function expectUserEqual(user, expected) {
     assert.equal(user.meta.votes, expected.meta.votes);
 }
 
-function findUser(query){
-    query = query || {};
-    return new Promise(function(resolve, reject){
-        User.findOne(query, function (err, user) {
-            if(err) {
-                return reject(err);
-            }
-            resolve(user);
-        });
-    });
-}
 it('no function property in resulting object', function * (){
     let res = Factory.attributes('with.trait', {}, { noText: true });
     assert.strictEqual(res.noText, undefined);
@@ -169,7 +158,7 @@ describe('dynamic traits', function() {
         Factory.traits.custom = function(mixedValue, attributes) {
             attributes._id = 'some-id-' + mixedValue;
         };
-        Factory.define('user-12332', function(lib) {
+        Factory.define('user-12332', function() {
             this.name = 'test user';
         });
         let userWithId = Factory.attributes('user-12332', {}, { custom: '10'});
@@ -182,7 +171,7 @@ describe('dynamic traits', function() {
         Factory.traits.custom = function(mixedValue, attributes) {
             attributes._id = 'some-id-' + mixedValue;
         };
-        Factory.define('user233456', function(lib) {
+        Factory.define('user233456', function() {
             this.name = 'test user';
         });
         let userWithId = Factory.attributes('user233456', {}, { custom: '10'});
@@ -252,7 +241,7 @@ describe('.define', function(){
     });
 
     it('without model', function * (){
-        Factory.define('no.model', function(lib) {
+        Factory.define('no.model', function() {
             this.id = 1;
         });
         // internals
@@ -260,7 +249,7 @@ describe('.define', function(){
     });
 
     it('with aliases', function * (){
-        Factory.define(['alias.model', 'alias.model.2'], function(lib) { });
+        Factory.define(['alias.model', 'alias.model.2'], function() { });
         // internals
         assert.notEqual(Factory.registry['alias.model'], null);
         assert.notEqual(Factory.registry['alias.model.2'], null);
@@ -268,14 +257,14 @@ describe('.define', function(){
 
     it('with duplicate aliases', function * (){
         assert.throws(function(){
-            Factory.define(['alias.123', 'alias.123'], function(lib) { });
+            Factory.define(['alias.123', 'alias.123'], function() { });
         }, 'Mongo factory alias.123 already defined');
     });
 
     it('with duplicate name', function * (){
         Factory.define('model.asd', function(){ });
         assert.throws(function(){
-            Factory.define(['model.asd'], function(lib) { });
+            Factory.define(['model.asd'], function() { });
         }, 'Mongo factory model.asd already defined');
     });
 
