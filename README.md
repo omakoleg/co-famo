@@ -7,7 +7,7 @@ Async actions returns promise. This allow to use it in `koa` framework.
 
 # Requrements
 
-- Require mongoose connection to be initialised before
+- Require mongoose connection to be initialised before in case of using mongo models
 
 # Installation
 
@@ -37,11 +37,11 @@ Tests written with `co-mocha`
  - `define([name, name2, name3], ... )` - define new factory with aliases.
  
 Parameter name could specify `parent`, it will be used to populate paramenters before current factory. Object with those data will be used as `this` for current builder
- - `define('child_name > parent_name', ... )` - define new factory with aliases.
+ - `define('child_name > parent_name', ... )` - define new factory with parent.
  - `define(['child_name > parent_name', 'child2 > parent2'], ... )` - define new factory with aliases.
 
 #### Object
-Will keep all defined traits in object
+Will keep all defined traits in object. Name could also have parent reference
  - `object(name)` - create obejct from factory attributes
  - `object(name, data)` - create object with attributes owervritten dey `data` values 
  - `object(name, data, traits)` - generate object using builder function
@@ -304,11 +304,28 @@ let userWithId = Factory.attributes('user', {}, { custom: '10'});
   _id: 'some-id-10'
 }
 */
-
 ```
-# TODO
+# Use functions inheritance
+```javascript
+Factory.define('parent', function() {
+    this.someMethod = function() {
+        this.id213 = 567;
+    };
+});
+Factory.define('child > parent', function() {
+    this.someMethod = function() {
+        this.id213 = 123;
+    };
+});
+let object = Factory.object('child');
+//
+obeject.someMethod(); // will set 123 from top child in chain
+```
 
-- get one
+
+# Changelog
+* added inheritance to `.object` which support parent object funcitons
+* top most function in inheritance chain will be set to resulting object
 
 #Licence
 

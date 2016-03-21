@@ -188,6 +188,20 @@ describe('dynamic traits', function() {
 });
 
 describe('predefined traits ', function (){
+    it('cant overwrite global trait funcitonality with locally defined', function*() {
+        Factory.define('some_342535', function() {
+            this.id = 234;
+            this.cid = 567;
+            this.omit = function() {
+                this.id = 12345;
+            };
+        });
+        let obj = Factory.object('some_342535', {}, { omit: 'cid'});
+        assert.strictEqual(obj.cid, undefined);
+        assert.equal(obj.id, 234);
+        obj.omit();
+        assert.equal(obj.id, 12345);
+    });
 
     describe('omit ', function (){
         it('applied as array', function * (){
@@ -323,6 +337,41 @@ describe('.object', function(){
         assert.equal(object.name, 'my name');
         assert.equal(typeof object.setId, 'function');
         object.setId();
+        assert.equal(object.id213, 123);
+    });
+
+    it('do not remove functions from parent object', function* (){
+        Factory.define('parent_sdt4', function() {
+            this.parentMethod = function() {
+                this.id213 = 567;
+            };
+        });
+        Factory.define('child_213 > parent_sdt4', function() {
+            this.setId = function() {
+                this.id213 = 123;
+            };
+        });
+        let object = Factory.object('child_213');
+        assert.equal(typeof object.setId, 'function');
+        assert.equal(typeof object.parentMethod, 'function');
+        object.parentMethod();
+        assert.equal(object.id213, 567);
+    });
+
+    it('traits applied after merging parent.', function* (){
+        Factory.define('parent_sdt45', function() {
+            this.someMethod = function() {
+                this.id213 = 567;
+            };
+        });
+        Factory.define('child_2135 > parent_sdt45', function() {
+            this.someMethod = function() {
+                this.id213 = 123;
+            };
+        });
+        let object = Factory.object('child_2135');
+        assert.equal(typeof object.someMethod, 'function');
+        object.someMethod();
         assert.equal(object.id213, 123);
     });
 });

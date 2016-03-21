@@ -177,7 +177,7 @@ cofamo.object = function(name, data, traits) {
     let registry = cofamo.registry[name];
     let temp = {};
     if(registry.parent) {
-        temp = cofamo.attributes(registry.parent);
+        temp = cofamo.object(registry.parent);
     }
     registry.builder.call(temp, cofamo);
     // run each trait in context of builded cofamo
