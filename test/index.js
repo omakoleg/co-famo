@@ -1,20 +1,25 @@
 'use strict';
 
-require('co-mocha');
-
 let mongoose = require('mongoose'),
+    coMocha = require('co-mocha'),
+    mocha = require('mocha'),
     Random = require('random-js')(),
     assert = require('assert'),
     mockgoose = require('mockgoose'),
-    Factory = require('../');
+    cofamo = require('../');
 
+
+coMocha(mocha);
 mockgoose(mongoose);
+
+let Factory = new cofamo.Factory();
 
 before(function(done) {
     mongoose.connect('mongodb://example.com/TestingDB', function(err) {
         done(err);
     });
 });
+
 // mongoose.set('debug', true);
 
 var schema = mongoose.Schema({
@@ -96,6 +101,9 @@ function expectUserEqual(user, expected) {
     assert.equal(user.meta.favs, expected.meta.favs);
     assert.equal(user.meta.votes, expected.meta.votes);
 }
+
+
+console.log('Factory', Factory);
 
 it('no function property in resulting object', function * (){
     let res = Factory.attributes('with.trait', {}, { noText: true });
