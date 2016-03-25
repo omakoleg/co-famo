@@ -78,9 +78,38 @@ function expectUserEqual(user, expected) {
     assert.equal(user.meta.votes, expected.meta.votes);
 }
 
-it('no function property in resulting object', function * (){
-    let res = Factory.attributes('with.trait', {}, { noText: true });
-    assert.strictEqual(res.noText, undefined);
+describe('constructor', function() {
+    
+    it('set options', function *() {
+        let Factory2 = new cofamo.Factory({
+            errorPrefix: '1',
+            provider: '2'
+        });
+        assert.equal(Factory2.errorPrefix, '1');
+        assert.equal(Factory2.provider, '2');
+    });
+    it('call resetRegistry');
+    it('call resetGlobalTraits');
+});
+
+describe('resetGlobalTraits', function() {
+    
+    it('reset', function * () {
+        let f = new cofamo.Factory();
+        f.traits.my = function() {}
+        f.resetGlobalTraits();
+        assert.deepEqual(Object.keys(f.traits), ['omit']);
+    });
+});
+
+describe('resetRegistry', function() {
+    
+    it('reset', function * () {
+        let f = new cofamo.Factory();
+        f.define('test', function(){ });
+        f.resetRegistry();
+        assert.deepEqual(f.registry, {});
+    });
 });
 
 describe('merging data', function (){
@@ -358,6 +387,12 @@ describe('.object', function(){
 });
 
 describe('.attributes', function(){
+    
+    it('no function property in resulting object', function * (){
+        let res = Factory.attributes('with.trait', {}, { noText: true });
+        assert.strictEqual(res.noText, undefined);
+    });
+
     it('set user attributes', function * (){
         let attributes = Factory.attributes('user');
         expectUser(attributes);
