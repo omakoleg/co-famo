@@ -5,9 +5,47 @@
 Simple npm for creating mongoose models in test cases.
 Async actions returns promise. This allow to use it in `koa` framework. 
 
-# Requrements
+# Upgrate notes for 2.x
+Creating new factory
+```
+let cofamo = require('co-famo');
+let Factory = new cofamo.Factory();
+```
+Providing options to factory
+```
+let cofamo = require('co-famo');
+let Factory = new cofamo.Factory({
+    errorPrefix: 'My fancy factory',
+    provider: { object for working with provided models}
+});
+```
+Default persisting provider is mongoose.
+You could change provider (example for simple memory provider):
+```
+let cofamo = require('co-famo');
+let factory = new cofamo.Factory({
+    provider: new cofamo.MemoryProvider()
+});
+// define model class
+class MemoryModel {
+    constructor(attr) {
+        this.a = attr.a;
+    }
+}
+// define factory
+factory.define('test', MemoryModel, function(){
+    this.a = 1;
+})
+// get object form model
+factory.build('test') /// { a: 1 }
+```
+Example of simple provider could be found in `lib/provider/memory`
 
-- Require mongoose connection to be initialised before in case of using mongo models
+
+# Options
+
+- errorPrefix - log prefix for messages
+- provider - custom persisting factory
 
 # Installation
 
@@ -64,14 +102,14 @@ Will keep all defined traits in object. Name could also have parent reference
 #### Clean
  - `clean(name)`, `clean(name, query)` - remove entries from database. All or using filter
  
-#### Array attributes, build, create
- - `method(name)` Default count is 1
- - `method(name, count)`
- - `method(name, count, data)`
- - `method(name, count, data, traits)`
+#### Array methods: attributes, object, build, create
+ - `[method](name)` Default count is 1
+ - `[method](name, count)`
+ - `[method](name, count, data)`
+ - `[method](name, count, data, traits)`
 
 
-##### Note for generating entry values
+# Note for generating entry values
 
 Prefferable to use `random-js` to generate each value as somehting random. 
 ```javascript
@@ -82,7 +120,7 @@ Factory.define('user.meta', function(lib) {
     this.body = Random.hex(40);
 });
 ```
-##### Best practice
+# Best practice for using in tests
 You can't know dynamic value of entry and can't rely on its value without directly specifying it.
 
 ```javascript
@@ -120,8 +158,12 @@ let responseEntry = doSomething(attributes); // will return entry
 expect(responseEntry.votes).to.eql(231);
 ```
 
-
 # Usage
+All examples has `Factory` initialised:
+```
+let cofamo = require('co-famo');
+let Factory = new cofamo.Factory();
+```
 
 Define accept builder funciton with one argument which set to current factory object. 
 
@@ -322,10 +364,11 @@ let object = Factory.object('child');
 obeject.someMethod(); // will set 123 from top child in chain
 ```
 
-
-# Changelog
-* added inheritance to `.object` which support parent object funcitons
-* top most function in inheritance chain will be set to resulting object
+#TODO
+- describe provider interface
+- tests for memory provider
+- tests for mongoose provider
+- refactor tests to use groupping by describe
 
 #Licence
 

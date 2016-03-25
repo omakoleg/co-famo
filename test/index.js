@@ -78,6 +78,36 @@ function expectUserEqual(user, expected) {
     assert.equal(user.meta.votes, expected.meta.votes);
 }
 
+describe('custom provider', function(){
+    it('no provider set allow to use attributes', function*() {
+        let f = new cofamo.Factory({
+            provider: null
+        });
+        f.define('test', function(){
+            this.a = 1;
+        })
+        assert.deepEqual(f.attributes('test'), { a: 1 });
+    });
+
+    it('full cycle for memory provider', function*() {
+        let f = new cofamo.Factory({
+            provider: new cofamo.MemoryProvider()
+        });
+        class MemoryModel {
+            constructor(attr) {
+                this.a = attr.a;
+            }
+        }
+        f.define('test', MemoryModel, function(){
+            this.a = 1;
+        })
+        assert.deepEqual(f.attributes('test'), { a: 1 });
+        assert.deepEqual(f.build('test'), { a: 1 });
+        assert.deepEqual(f.object('test'), { a: 1 });
+        assert.deepEqual(yield f.create('test'), { a: 1, _id: 1 });
+    });
+});
+
 describe('constructor', function() {
     
     it('set options', function *() {
@@ -387,7 +417,7 @@ describe('.object', function(){
 });
 
 describe('.attributes', function(){
-    
+
     it('no function property in resulting object', function * (){
         let res = Factory.attributes('with.trait', {}, { noText: true });
         assert.strictEqual(res.noText, undefined);
