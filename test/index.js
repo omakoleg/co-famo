@@ -1,49 +1,25 @@
 'use strict';
 
 let mongoose = require('mongoose'),
-    coMocha = require('co-mocha'),
-    mocha = require('mocha'),
     Random = require('random-js')(),
     assert = require('assert'),
     mockgoose = require('mockgoose'),
+    User = require('./user.model'),
+    RequestModel = require('./request.model'),
     cofamo = require('../');
 
-
-coMocha(mocha);
+require('co-mocha');
 mockgoose(mongoose);
-
 let Factory = new cofamo.Factory();
 
 before(function(done) {
-    mongoose.connect('mongodb://example.com/TestingDB', function(err) {
-        done(err);
+    mongoose.connect('mongodb://example.com/TestingDB', function() {
+        done();
     });
 });
-
 // mongoose.set('debug', true);
 
-var schema = mongoose.Schema({
-    name:  String,
-    body:   String,
-    comments: [{ 
-        body: String, 
-        date: Date 
-    }],
-    date: { type: Date, default: Date.now },
-    hidden: Boolean,
-    meta: {
-        votes: Number,
-        favs:  Number
-    }
-});
-var User = mongoose.model('User', schema);
-
-var WithTrait = mongoose.model('WithTrait', mongoose.Schema({
-    body:  String,
-    text: String
-}));
-
-Factory.define('with.trait', WithTrait, function() {
+Factory.define('with.trait', RequestModel, function() {
     this.body = Random.hex(32);
     this.text = Random.hex(32);
 
@@ -102,9 +78,6 @@ function expectUserEqual(user, expected) {
     assert.equal(user.meta.votes, expected.meta.votes);
 }
 
-
-console.log('Factory', Factory);
-
 it('no function property in resulting object', function * (){
     let res = Factory.attributes('with.trait', {}, { noText: true });
     assert.strictEqual(res.noText, undefined);
@@ -112,7 +85,7 @@ it('no function property in resulting object', function * (){
 
 describe('merging data', function (){
     it('do deep merge object', function * (){
-        Factory.define('user-345234523', function(lib) {
+        Factory.define('user-345234523', function() {
             this.first = {
                 second: {
                     third: 1
@@ -137,7 +110,7 @@ describe('merging data', function (){
     });
 
     it('do not deep merge array', function * (){
-        Factory.define('user-624dfg34', function(lib) {
+        Factory.define('user-624dfg34', function() {
             this.first = [ 1 ];
         });
         let mergedData = Factory.attributes('user-624dfg34', {
