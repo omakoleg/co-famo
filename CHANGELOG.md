@@ -1,3 +1,7 @@
+# 2.0.1
+
+* added provider API definition
+
 # 2.0.0
 
 * added providers

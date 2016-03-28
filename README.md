@@ -7,21 +7,21 @@ Async actions returns promise. This allow to use it in `koa` framework.
 
 # Upgrate notes for 2.x
 Creating new factory
-```
+```javascript
 let cofamo = require('co-famo');
 let Factory = new cofamo.Factory();
 ```
 Providing options to factory
-```
+```javascript
 let cofamo = require('co-famo');
 let Factory = new cofamo.Factory({
     errorPrefix: 'My fancy factory',
     provider: { object for working with provided models}
 });
 ```
-Default persisting provider is mongoose.
+Default persisting provider is mongoose. Provider interface description [Sample Provider explained](PROVIDER.md)
 You could change provider (example for simple memory provider):
-```
+```javascript
 let cofamo = require('co-famo');
 let factory = new cofamo.Factory({
     provider: new cofamo.MemoryProvider()
@@ -363,9 +363,10 @@ let object = Factory.object('child');
 //
 obeject.someMethod(); // will set 123 from top child in chain
 ```
+# Changelog
+[Changelog file](CHANGELOG.md)
 
 #TODO
-- describe provider interface
 - tests for memory provider
 - tests for mongoose provider
 - refactor tests to use groupping by describe
