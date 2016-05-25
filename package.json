@@ -1,5 +1,5 @@
 {
-  "name": "co-famo",
+  "name": "@7pay/co-famo",
   "version": "2.0.1",
   "description": "Simple npm for creating mongoose models in test cases.",
   "main": "index.js",
